@@ -1,6 +1,8 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import reportRoutes from './routes/report.route.js';
+
 
 dotenv.config();
 
@@ -10,14 +12,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
-app.get("/", (req,res) => {
-          res.status(200).json({
-                    status:"OK",
-                    message:"Server is running!!"
-
-          });
-});
+// Bind routes
+app.use('/api/reports',reportRoutes)
 
 const PORT = 5000;
 
