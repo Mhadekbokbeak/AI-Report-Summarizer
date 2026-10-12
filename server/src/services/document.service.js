@@ -1,5 +1,11 @@
-import { PDFParse } from 'pdf-parse';
+import { DOMMatrix, ImageData, Path2D } from '@napi-rs/canvas';
 import path from 'path';
+
+globalThis.DOMMatrix ??= DOMMatrix;
+globalThis.ImageData ??= ImageData;
+globalThis.Path2D ??= Path2D;
+
+const { PDFParse } = await import('pdf-parse');
 
 export const extractTextFromFile = async (file) => {
   if (!file || !Buffer.isBuffer(file.buffer)) {
