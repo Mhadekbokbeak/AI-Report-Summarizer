@@ -89,7 +89,7 @@ Frontend สำหรับพัฒนาจะ proxy คำขอ `/api` ไ�
 สร้าง Vercel Project สองโปรเจกต์จาก repository เดียวกัน:
 
 - Frontend: **Root Directory** `frontend`, Framework `Vite`, Build Command `npm run build`, Output Directory `dist`
-- Backend: **Root Directory** `server`, Framework `Express`
+- Backend: **Root Directory** `server`, Framework `Express`. The `server/vercel.json` configuration includes the PDF.js worker file required by PDF uploads.
 
 ตั้ง Environment Variables ใน Vercel Project ที่เกี่ยวข้อง (Production และ Preview ตามต้องการ):
 
