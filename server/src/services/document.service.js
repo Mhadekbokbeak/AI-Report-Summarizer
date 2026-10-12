@@ -1,4 +1,5 @@
 import { DOMMatrix, ImageData, Path2D } from '@napi-rs/canvas';
+import 'pdfjs-dist/legacy/build/pdf.worker.mjs';
 import path from 'path';
 
 globalThis.DOMMatrix ??= DOMMatrix;
