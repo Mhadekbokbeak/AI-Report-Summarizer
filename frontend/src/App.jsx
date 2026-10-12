@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
 
 function getErrorMessage(payload, fallback) {
   return payload?.details || payload?.error || fallback;
@@ -303,7 +304,7 @@ export default function App() {
     try {
       const request =
         mode === 'text'
-          ? fetch('/api/reports/summarize', {
+          ? fetch(`${API_BASE_URL}/api/reports/summarize`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ text }),
@@ -311,7 +312,7 @@ export default function App() {
           : (() => {
               const formData = new FormData();
               formData.append('file', file);
-              return fetch('/api/reports/upload', {
+              return fetch(`${API_BASE_URL}/api/reports/upload`, {
                 method: 'POST',
                 body: formData,
               });

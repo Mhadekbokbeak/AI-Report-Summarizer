@@ -82,3 +82,5 @@ npm.cmd run dev
 ```
 
 Frontend สำหรับพัฒนาจะ proxy คำขอ `/api` ไปยัง backend ที่ `http://localhost:5000` โดยอัตโนมัติ
+
+เมื่อนำ Frontend ไป deploy แยกจาก Backend ให้ตั้ง `VITE_API_BASE_URL` เป็น base URL ของ Backend เช่น `https://your-api.example.com` (ไม่ต้องใส่ `/` ปิดท้าย) และตั้ง `CORS_ORIGIN` ฝั่ง Backend ให้ตรงกับ URL ของ Frontend ตัวแปร `VITE_API_BASE_URL` ไม่ใช่ secret; ห้ามใส่ Gemini API key ในตัวแปรที่ขึ้นต้นด้วย `VITE_`
