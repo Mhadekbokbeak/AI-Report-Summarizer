@@ -1,5 +1,5 @@
-import ai from "../config/gemini.js";
-import { Type } from "@google/genai";
+import { ensureGeminiReady } from '../config/gemini.js';
+import { Type } from '@google/genai';
 
 
 
@@ -72,22 +72,27 @@ const summaryResponseSchema = {
 };
 
 export const summarizeText = async (text) => {
-  const propmt = `Summarize the following report in Thai based on the provided JSON structure.
+  if (typeof text !== 'string' || text.trim() === '') {
+    throw new Error('ข้อความรายงานไม่ถูกต้อง');
+  }
 
-Report:${text}`;
+  const sanitizedText = text.trim().slice(0, 100000);
+  const prompt = `Summarize the following report in Thai based on the provided JSON structure.
 
-const response = await generateWithRetry(() => {
-  return ai.models.generateContent({
-    model: "gemini-3.8-flash",
-    contents: propmt,
-    config: {
-      responseMimeType: "application/json",
-      responseJsonSchema: summaryResponseSchema,
-      temperature: 0.2,
-    },
+Report:${sanitizedText}`;
+  const client = ensureGeminiReady();
+
+  const response = await generateWithRetry(() => {
+    return client.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseJsonSchema: summaryResponseSchema,
+        temperature: 0.2,
+      },
+    });
   });
-});
-  console.log("Gemini response:", response);
 
   const parsedSummary = JSON.parse(response.text);
 

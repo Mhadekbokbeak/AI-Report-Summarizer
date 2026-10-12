@@ -1,22 +1,12 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import reportRoutes from './routes/report.route.js';
+import app from './app.js';
 
+const configuredPort = process.env.PORT?.trim() || '5000';
+const PORT = Number(configuredPort);
 
-dotenv.config();
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+  throw new Error('PORT must be an integer between 1 and 65535.');
+}
 
-const app = express();
-
-// middleware 
-app.use(cors());
-app.use(express.json());
-
-// Bind routes
-app.use('/api/reports',reportRoutes)
-
-const PORT = 5000;
-
-app.listen(PORT,() => {
-          console.log(`Server is running on PORT => ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on PORT => ${PORT}`);
 });

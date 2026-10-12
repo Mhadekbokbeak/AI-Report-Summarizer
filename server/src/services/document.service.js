@@ -1,32 +1,48 @@
 import { PDFParse } from 'pdf-parse';
 import path from 'path';
 
-export const extractTextFromFile = async (file)  => {
-          if (!file || !file.buffer) {
-                    throw new Error('ไม่พบข้อมูลไฟล์ที่อัปโหลด');
-          }
+export const extractTextFromFile = async (file) => {
+  if (!file || !Buffer.isBuffer(file.buffer)) {
+    throw new Error('ไม่พบข้อมูลไฟล์ที่อัปโหลด');
+  }
 
-          const ext = path.extname(file.originalname).toLowerCase();
-          const mimeType = file.mimeType;
+  const ext = path.extname(file.originalname || '').toLowerCase();
+  const mimeType = (file.mimetype || '').toLowerCase();
 
-          // Case file .txt 
-          if (mimeType === 'text/plain' || ext === 'txt') {
-                    const text = file.buffer.toString('utf-8');
-                    return text
-          }
+  if (
+    ext === '.txt' &&
+    (mimeType === 'text/plain' ||
+      mimeType === 'application/octet-stream' ||
+      !mimeType)
+  ) {
+    if (file.buffer.includes(0)) {
+      throw new Error('ไฟล์ TXT มีข้อมูลไบนารีที่ไม่รองรับ');
+    }
 
-          // Case file .pdf 
-          if (mimeType === 'application/pdf' || ext === '.pdf') {
-                    const parser = new PDFParse({
-                              data:file.buffer
-                    });
+    return file.buffer.toString('utf-8');
+  }
 
-                    const result = await parser.getText();
+  if (
+    ext === '.pdf' &&
+    (mimeType === 'application/pdf' ||
+      mimeType === 'application/octet-stream' ||
+      !mimeType)
+  ) {
+    const pdfHeader = file.buffer.indexOf(Buffer.from('%PDF-'), 0, 1024);
+    if (pdfHeader === -1) {
+      throw new Error('เนื้อหาไฟล์ไม่ใช่ PDF ที่ถูกต้อง');
+    }
 
-                    await parser.destroy();
+    const parser = new PDFParse({ data: file.buffer });
 
-                    return result.text;
-          }
+    try {
+      const result = await parser.getText();
+      return result.text || '';
+    } finally {
+      await parser.destroy();
+    }
 
-          throw new Error('ประเภทไฟล์ไม่รองรับ (รองรับเฉพาะ .pdf และ .txt)');
+  }
+
+  throw new Error('ประเภทไฟล์ไม่รองรับ (รองรับเฉพาะ .pdf และ .txt)');
 };

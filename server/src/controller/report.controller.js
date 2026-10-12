@@ -35,8 +35,15 @@ export const uploadAndSummarizeReport = async (req,res)=> {
                               });
                     }
 
-                    // Extract text From File 
-                    const extractedText = await extractTextFromFile(req.file);
+                    let extractedText;
+                    try {
+                              extractedText = await extractTextFromFile(req.file);
+                    } catch (error) {
+                              return res.status(400).json({
+                                        error:"ไม่สามารถอ่านไฟล์ได้ กรุณาตรวจสอบว่าไฟล์ไม่เสียหายและเป็น PDF หรือ TXT ที่รองรับ",
+                                        details:error.message,
+                              });
+                    }
 
                     if (!extractedText || extractedText.trim() === '') {
                               return res.status(400).json({
