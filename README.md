@@ -25,11 +25,12 @@
 
 ### 1. ตั้งค่า Backend
 
-สร้างไฟล์ `server/.env` แล้วใส่ค่าต่อไปนี้ โดยแทน `ใส่_GEMINI_API_KEY_ของคุณ` ด้วย API key ของตัวเอง:
+คัดลอก `server/.env.example` เป็น `server/.env` แล้วใส่ API key ของตัวเอง:
 
 ```env
-GEMINI_API_KEY=ใส่_GEMINI_API_KEY_ของคุณ
+GEMINI_API_KEY=your-gemini-api-key
 PORT=5000
+CORS_ORIGIN=http://localhost:5173
 ```
 
 อย่าเผยแพร่หรือ commit ไฟล์ `.env` หรือ API key ขึ้น Git
@@ -83,4 +84,23 @@ npm.cmd run dev
 
 Frontend สำหรับพัฒนาจะ proxy คำขอ `/api` ไปยัง backend ที่ `http://localhost:5000` โดยอัตโนมัติ
 
-เมื่อนำ Frontend ไป deploy แยกจาก Backend ให้ตั้ง `VITE_API_BASE_URL` เป็น base URL ของ Backend เช่น `https://your-api.example.com` (ไม่ต้องใส่ `/` ปิดท้าย) และตั้ง `CORS_ORIGIN` ฝั่ง Backend ให้ตรงกับ URL ของ Frontend ตัวแปร `VITE_API_BASE_URL` ไม่ใช่ secret; ห้ามใส่ Gemini API key ในตัวแปรที่ขึ้นต้นด้วย `VITE_`
+### Deploy บน Vercel แยก Frontend และ Backend
+
+สร้าง Vercel Project สองโปรเจกต์จาก repository เดียวกัน:
+
+- Frontend: **Root Directory** `frontend`, Framework `Vite`, Build Command `npm run build`, Output Directory `dist`
+- Backend: **Root Directory** `server`, Framework `Express`
+
+ตั้ง Environment Variables ใน Vercel Project ที่เกี่ยวข้อง (Production และ Preview ตามต้องการ):
+
+| Project | Variable | Value |
+| --- | --- | --- |
+| Backend | `GEMINI_API_KEY` | Gemini API key (เก็บเป็น secret) |
+| Backend | `CORS_ORIGIN` | Origin ของ frontend เช่น `https://ai-report-summarizer-rose.vercel.app` |
+| Frontend | `VITE_API_BASE_URL` | Base URL ของ backend เช่น `https://your-backend.vercel.app` |
+
+`CORS_ORIGIN` ต้องเป็น URL ต้นทางของหน้าเว็บ frontend ที่เปิดใน browser เท่านั้น: protocol + hostname ไม่มี path หรือ `/` ต่อท้าย เช่น `https://my-ui.vercel.app`. หากต้องอนุญาตหลาย frontend origins ให้คั่นด้วย comma. อย่าตั้งเป็น `*`.
+
+ฝั่ง frontend อ่าน `VITE_API_BASE_URL` ตอน build ดังนั้นหลังเปลี่ยน environment variables ต้อง redeploy frontend และ backend. ใน browser DevTools → Network ให้ดูค่า **Request URL** (โดเมน backend) และ **Request Headers → Origin** (โดเมน frontend); ค่า Origin นี้ต้องตรงกับ `CORS_ORIGIN` ฝั่ง backend.
+
+ตัวแปร `VITE_API_BASE_URL` ไม่ใช่ secret และจะถูกใส่ใน frontend bundle; ห้ามใส่ Gemini API key ในตัวแปรที่ขึ้นต้นด้วย `VITE_`.
